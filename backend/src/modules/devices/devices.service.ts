@@ -1,8 +1,19 @@
 import { db } from '../../db/db';
 import { devices, deviceVerifications } from './devices.schema';
-import { eq, sql, desc } from 'drizzle-orm';
+import { eq, sql, desc, asc } from 'drizzle-orm';
 
 export async function getDevices() {
+  const latestDeviceVerifications = db
+    .select({
+      id: deviceVerifications.id,
+      deviceId: deviceVerifications.device_id,
+      status: deviceVerifications.status,
+      createdAt: deviceVerifications.created_at,
+    })
+    .from(deviceVerifications)
+    .orderBy(desc(deviceVerifications.created_at))
+    .as('latest_device_verifications');
+
   const result = await db
     .select({
       id: devices.id,
@@ -11,14 +22,13 @@ export async function getDevices() {
       deviceMeta: devices.device_meta,
       registeredAt: devices.registered_at,
       createdBy: devices.created_by,
-      status: db
-        .select({ status: deviceVerifications.status })
-        .from(deviceVerifications)
-        .where(eq(deviceVerifications.device_id, devices.id))
-        .orderBy(desc(deviceVerifications.created_at))
-        .limit(1),
+      status: latestDeviceVerifications.status,
     })
-    .from(devices);
+    .from(devices)
+    .leftJoin(
+      latestDeviceVerifications,
+      eq(devices.id, latestDeviceVerifications.deviceId),
+    );
 
   return result;
 }
