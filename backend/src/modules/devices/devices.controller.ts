@@ -6,7 +6,11 @@ export async function getDevicesHandler(
   reply: FastifyReply,
 ) {
   const devices = await getDevices();
-  return reply.code(200).send(devices);
+  const formattedDevices = devices.map((device) => ({
+    ...device,
+    status: device.status.length > 0 ? device.status[0].status : null,
+  }));
+  return reply.code(200).send(formattedDevices);
 }
 
 export async function approveDeviceHandler(
