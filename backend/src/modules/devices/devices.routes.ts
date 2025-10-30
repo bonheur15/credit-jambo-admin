@@ -25,6 +25,7 @@ export async function devicesRoutes(server: FastifyInstance) {
                 device_meta: { type: "object" },
                 registered_at: { type: "string" },
                 created_by: { type: "string" },
+                status: { type: ["string", "null"] },
               },
             },
           },
