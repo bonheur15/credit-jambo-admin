@@ -30,7 +30,7 @@ export async function findUserById(id: string) {
 }
 
 export async function createRefreshToken(
-  data: Omit<CreateRefreshTokenInput, "token_hash" | "device_id">,
+  data: Omit<CreateRefreshTokenInput, "token_hash">,
 ) {
   const token = randomBytes(32).toString("hex");
   const tokenHash = createHash("sha256").update(token).digest("hex");

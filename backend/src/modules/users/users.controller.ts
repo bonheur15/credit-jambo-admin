@@ -19,10 +19,10 @@ import {
 } from "../../utils/errors";
 
 export async function loginHandler(
-  request: FastifyRequest<{ Body: CreateUserInput }>,
+  request: FastifyRequest<{ Body: CreateUserInput & { device_id: string } }>,
   reply: FastifyReply,
 ) {
-  const { email, password_hash } = request.body;
+  const { email, password_hash, device_id } = request.body;
 
   const user = await findUserByEmail(email);
 
@@ -37,8 +37,24 @@ export async function loginHandler(
   }
 
   const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-
   const alg = "HS256";
+
+  let jwtExpirationTime = "1m"; // Default for non-admin
+  let refreshToken = undefined;
+
+  if (user.role === "admin") {
+    jwtExpirationTime = "1d"; // 1 day for admin
+  } else {
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7); // Refresh token valid for 7 days
+
+    const { refreshToken: createdRefreshToken } = await createRefreshToken({
+      user_id: user.id,
+      expires_at: expiresAt,
+      device_id: device_id,
+    });
+    refreshToken = createdRefreshToken;
+  }
 
   const jwt = await new SignJWT({
     id: user.id,
@@ -49,16 +65,8 @@ export async function loginHandler(
     .setIssuedAt()
     .setIssuer("urn:example:issuer")
     .setAudience("urn:example:audience")
-    .setExpirationTime("1m") // Short-lived access token
+    .setExpirationTime(jwtExpirationTime) // Use dynamic expiration
     .sign(secret);
-
-  const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + 7); // Refresh token valid for 7 days
-
-  const { refreshToken } = await createRefreshToken({
-    user_id: user.id,
-    expires_at: expiresAt,
-  });
 
   return reply.code(200).send({ jwt, refresh_token: refreshToken });
 }
@@ -104,6 +112,7 @@ export async function refreshTokenHandler(
   const { refreshToken: newRefreshToken } = await createRefreshToken({
     user_id: user.id,
     expires_at: newExpiresAt,
+    device_id: storedRefreshToken.device_id,
   });
 
   return reply.code(200).send({ jwt: newJwt, refresh_token: newRefreshToken });
