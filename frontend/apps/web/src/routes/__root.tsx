@@ -1,5 +1,6 @@
 import Header from "@/components/header";
 import Loader from "@/components/loader";
+import Sidebar from "@/components/sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import {
@@ -38,6 +39,27 @@ function RootComponent() {
   const isFetching = useRouterState({
     select: (s) => s.isLoading,
   });
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  const isLoginPage = pathname === "/";
+
+  if (isLoginPage) {
+    return (
+      <>
+        <HeadContent />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          disableTransitionOnChange
+          storageKey="vite-ui-theme"
+        >
+          {isFetching ? <Loader /> : <Outlet />}
+          <Toaster richColors />
+        </ThemeProvider>
+        <TanStackRouterDevtools position="bottom-left" />
+      </>
+    );
+  }
 
   return (
     <>
@@ -50,7 +72,12 @@ function RootComponent() {
       >
         <div className="grid grid-rows-[auto_1fr] h-svh">
           <Header />
-          {isFetching ? <Loader /> : <Outlet />}
+          <div className="grid grid-cols-[auto_1fr]">
+            <Sidebar />
+            <main className="overflow-auto">
+              {isFetching ? <Loader /> : <Outlet />}
+            </main>
+          </div>
         </div>
         <Toaster richColors />
       </ThemeProvider>
