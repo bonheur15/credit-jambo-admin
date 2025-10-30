@@ -9,25 +9,25 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UsersRouteImport } from './routes/users'
 import { Route as TransactionsRouteImport } from './routes/transactions'
-import { Route as RegisterRouteImport } from './routes/register'
-import { Route as DeviceNotApprovedRouteImport } from './routes/device-not-approved'
+import { Route as DevicesRouteImport } from './routes/devices'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 
+const UsersRoute = UsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TransactionsRoute = TransactionsRouteImport.update({
   id: '/transactions',
   path: '/transactions',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RegisterRoute = RegisterRouteImport.update({
-  id: '/register',
-  path: '/register',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DeviceNotApprovedRoute = DeviceNotApprovedRouteImport.update({
-  id: '/device-not-approved',
-  path: '/device-not-approved',
+const DevicesRoute = DevicesRouteImport.update({
+  id: '/devices',
+  path: '/devices',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -44,59 +44,50 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
-  '/device-not-approved': typeof DeviceNotApprovedRoute
-  '/register': typeof RegisterRoute
+  '/devices': typeof DevicesRoute
   '/transactions': typeof TransactionsRoute
+  '/users': typeof UsersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
-  '/device-not-approved': typeof DeviceNotApprovedRoute
-  '/register': typeof RegisterRoute
+  '/devices': typeof DevicesRoute
   '/transactions': typeof TransactionsRoute
+  '/users': typeof UsersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
-  '/device-not-approved': typeof DeviceNotApprovedRoute
-  '/register': typeof RegisterRoute
+  '/devices': typeof DevicesRoute
   '/transactions': typeof TransactionsRoute
+  '/users': typeof UsersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/dashboard'
-    | '/device-not-approved'
-    | '/register'
-    | '/transactions'
+  fullPaths: '/' | '/dashboard' | '/devices' | '/transactions' | '/users'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/dashboard'
-    | '/device-not-approved'
-    | '/register'
-    | '/transactions'
-  id:
-    | '__root__'
-    | '/'
-    | '/dashboard'
-    | '/device-not-approved'
-    | '/register'
-    | '/transactions'
+  to: '/' | '/dashboard' | '/devices' | '/transactions' | '/users'
+  id: '__root__' | '/' | '/dashboard' | '/devices' | '/transactions' | '/users'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
-  DeviceNotApprovedRoute: typeof DeviceNotApprovedRoute
-  RegisterRoute: typeof RegisterRoute
+  DevicesRoute: typeof DevicesRoute
   TransactionsRoute: typeof TransactionsRoute
+  UsersRoute: typeof UsersRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/users': {
+      id: '/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof UsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/transactions': {
       id: '/transactions'
       path: '/transactions'
@@ -104,18 +95,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TransactionsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/register': {
-      id: '/register'
-      path: '/register'
-      fullPath: '/register'
-      preLoaderRoute: typeof RegisterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/device-not-approved': {
-      id: '/device-not-approved'
-      path: '/device-not-approved'
-      fullPath: '/device-not-approved'
-      preLoaderRoute: typeof DeviceNotApprovedRouteImport
+    '/devices': {
+      id: '/devices'
+      path: '/devices'
+      fullPath: '/devices'
+      preLoaderRoute: typeof DevicesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -138,9 +122,9 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
-  DeviceNotApprovedRoute: DeviceNotApprovedRoute,
-  RegisterRoute: RegisterRoute,
+  DevicesRoute: DevicesRoute,
   TransactionsRoute: TransactionsRoute,
+  UsersRoute: UsersRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
