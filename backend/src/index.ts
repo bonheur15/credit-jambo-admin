@@ -92,6 +92,7 @@ import { accountsRoutes } from "./modules/accounts/accounts.routes";
 
 server.register(devicesRoutes, { prefix: "/api/devices" });
 import { transactionsRoutes } from "./modules/transactions/transactions.routes";
+server.register(transactionsRoutes, { prefix: "/api/transactions" });
 
 server.register(accountsRoutes, { prefix: "/api/accounts" });
 

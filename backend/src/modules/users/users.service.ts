@@ -1,8 +1,8 @@
 import { db } from "../../db/db";
 import { users, refreshTokens } from "./users.schema";
 import { accounts } from "../accounts/accounts.schema";
-import { accountBalanceSnapshots as account_balance_snapshots } from "../account_balance_snapshots/account_balance_snapshots.schema";
-import { eq, and, isNull, desc } from "drizzle-orm";
+import { transactions } from "../transactions/transactions.schema";
+import { eq, and, isNull, desc, sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { createHash } from "crypto";
@@ -83,16 +83,16 @@ export async function getUser(id: string) {
 
   const accountsWithBalances = await Promise.all(
     userAccounts.map(async (account) => {
-      const latestSnapshot = await db
-        .select()
-        .from(account_balance_snapshots)
-        .where(eq(account_balance_snapshots.account_id, account.id))
-        .orderBy(desc(account_balance_snapshots.created_at))
-        .limit(1);
+      const [balanceResult] = await db
+        .select({
+          balance: sql`COALESCE(SUM(CASE WHEN ${transactions.type} = 'DEPOSIT' THEN ${transactions.amount} WHEN ${transactions.type} = 'WITHDRAWAL' THEN -${transactions.amount} ELSE 0 END), 0)`,
+        })
+        .from(transactions)
+        .where(eq(transactions.account_id, account.id));
 
       return {
         ...account,
-        balance: latestSnapshot[0]?.balance ?? 0,
+        balance: balanceResult.balance,
       };
     }),
   );
