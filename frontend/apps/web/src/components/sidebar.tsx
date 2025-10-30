@@ -17,38 +17,62 @@ export default function Sidebar() {
         </header>
 
         <nav className="flex flex-col space-y-1">
-          <a className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors bg-zinc-100 text-zinc-900">
+          <Link
+            to="/dashboard"
+            activeProps={{ className: "bg-zinc-100 text-zinc-900" }}
+            className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors hover:bg-zinc-800 hover:text-white"
+          >
             <Home className="h-5 w-5" />
             Dashboard
-          </a>
+          </Link>
 
-          <a className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors hover:bg-zinc-800 hover:text-white">
+          <Link
+            to="/users"
+            activeProps={{ className: "bg-zinc-100 text-zinc-900" }}
+            className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors hover:bg-zinc-800 hover:text-white"
+          >
             <Users className="h-5 w-5" />
             Users
-          </a>
+          </Link>
 
-          <a className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors hover:bg-zinc-800 hover:text-white">
+          <Link
+            to="/accounts"
+            activeProps={{ className: "bg-zinc-100 text-zinc-900" }}
+            className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors hover:bg-zinc-800 hover:text-white"
+          >
             <User className="h-5 w-5" />
             Accounts
-          </a>
+          </Link>
 
-          <a className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors hover:bg-zinc-800 hover:text-white">
+          <Link
+            to="/transactions"
+            activeProps={{ className: "bg-zinc-100 text-zinc-900" }}
+            className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors hover:bg-zinc-800 hover:text-white"
+          >
             <DollarSign className="h-5 w-5" />
             Transactions
-          </a>
+          </Link>
 
-          <a className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors hover:bg-zinc-800 hover:text-white">
+          <Link
+            to="/devices"
+            activeProps={{ className: "bg-zinc-100 text-zinc-900" }}
+            className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors hover:bg-zinc-800 hover:text-white"
+          >
             <Smartphone className="h-5 w-5" />
             Devices
-          </a>
+          </Link>
         </nav>
       </div>
 
       <nav>
-        <a className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors hover:bg-zinc-800 hover:text-white">
+        <Link
+          to="/"
+          onClick={() => localStorage.removeItem("jwt")}
+          className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors hover:bg-zinc-800 hover:text-white"
+        >
           <ArrowLeft className="h-5 w-5" />
           Logout
-        </a>
+        </Link>
       </nav>
     </aside>
   );

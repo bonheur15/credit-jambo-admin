@@ -80,7 +80,6 @@ const UserDetailsSidebar: React.FC<{ user: UserProfile }> = ({ user }) => (
       User Details
     </h1>
 
-    {/* Profile Section */}
     <div className="flex flex-col items-center">
       <img
         src={user.avatarUrl}

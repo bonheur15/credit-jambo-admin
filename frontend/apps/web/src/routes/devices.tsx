@@ -1,116 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router";
+import React from "react";
+import { ChevronDown } from "lucide-react";
+import { toast } from "sonner";
+import { fetchWithAuth } from "../lib/api";
 
 export const Route = createFileRoute("/devices")({
   component: DevicesManagement,
 });
 
-import React from "react";
-import { ChevronDown } from "lucide-react";
-
 type DeviceStatus = "VERIFIED" | "PENDING";
 
 interface Device {
   id: string;
-  userId: string;
-  meta: string;
-  registeredAt: string;
-  registeredTime: string;
-  createdBy: string;
+  user_id: string;
+  device_id: string;
+  device_meta: Record<string, any>;
+  registered_at: string;
+  created_by: string;
   status: DeviceStatus;
 }
-
-const mockDevices: Device[] = [
-  {
-    id: "Device-001",
-    userId: "User-123",
-    meta: "Phone (iOS)",
-    registeredAt: "2024-01-15",
-    registeredTime: "10:00 AM",
-    createdBy: "Admin-001",
-    status: "VERIFIED",
-  },
-  {
-    id: "Device-002",
-    userId: "User-456",
-    meta: "Laptop (macOS)",
-    registeredAt: "2024-02-20",
-    registeredTime: "02:30 PM",
-    createdBy: "Admin-002",
-    status: "VERIFIED",
-  },
-  {
-    id: "Device-003",
-    userId: "User-789",
-    meta: "Tablet (Android)",
-    registeredAt: "2024-03-10",
-    registeredTime: "09:45 AM",
-    createdBy: "Admin-001",
-    status: "PENDING",
-  },
-  {
-    id: "Device-004",
-    userId: "User-101",
-    meta: "Phone (Android)",
-    registeredAt: "2024-04-05",
-    registeredTime: "11:15 AM",
-    createdBy: "Admin-002",
-    status: "VERIFIED",
-  },
-  {
-    id: "Device-005",
-    userId: "User-112",
-    meta: "Laptop (Windows)",
-    registeredAt: "2024-05-12",
-    registeredTime: "01:00 PM",
-    createdBy: "Admin-001",
-    status: "PENDING",
-  },
-  {
-    id: "Device-006",
-    userId: "User-131",
-    meta: "Tablet (iOS)",
-    registeredAt: "2024-06-18",
-    registeredTime: "03:45 PM",
-    createdBy: "Admin-002",
-    status: "VERIFIED",
-  },
-  {
-    id: "Device-007",
-    userId: "User-141",
-    meta: "Phone (iOS)",
-    registeredAt: "2024-07-22",
-    registeredTime: "08:00 AM",
-    createdBy: "Admin-001",
-    status: "PENDING",
-  },
-  {
-    id: "Device-008",
-    userId: "User-151",
-    meta: "Laptop (macOS)",
-    registeredAt: "2024-08-28",
-    registeredTime: "04:15 PM",
-    createdBy: "Admin-002",
-    status: "VERIFIED",
-  },
-  {
-    id: "Device-009",
-    userId: "User-151",
-    meta: "Tablet (Android)",
-    registeredAt: "2024-09-14",
-    registeredTime: "08:30 AM",
-    createdBy: "Admin-001",
-    status: "PENDING",
-  },
-  {
-    id: "Device-010",
-    userId: "User-171",
-    meta: "Phone (Android)",
-    registeredAt: "2024-10-20",
-    registeredTime: "07:45 PM",
-    createdBy: "Admin-002",
-    status: "VERIFIED",
-  },
-];
 
 const StatusBadge: React.FC<{ status: DeviceStatus }> = ({ status }) => {
   const baseClasses =
@@ -131,6 +39,73 @@ const FilterDropdown: React.FC<{ label: string }> = ({ label }) => (
 );
 
 function DevicesManagement() {
+  const [devices, setDevices] = React.useState<Device[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const fetchDevices = async () => {
+    setLoading(true);
+    try {
+      const response = await fetchWithAuth("devices");
+      if (response.ok) {
+        const data: Device[] = await response.json();
+        setDevices(data);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || "Failed to fetch devices.");
+        toast.error(errorData.message || "Failed to fetch devices.");
+      }
+    } catch (err: any) {
+      setError(err.message || "An unexpected error occurred.");
+      toast.error(err.message || "An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchDevices();
+  }, []);
+
+  const handleApprove = async (deviceId: string) => {
+    try {
+      const response = await fetchWithAuth(`devices/${deviceId}/approve`);
+      if (response.ok) {
+        toast.success("Device approved successfully!");
+        fetchDevices(); // Refresh the list of devices
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || "Failed to approve device.");
+      }
+    } catch (err: any) {
+      toast.error(
+        err.message || "An unexpected error occurred during approval.",
+      );
+    }
+  };
+
+  if (loading) {
+    return (
+      <main className="flex-1 overflow-y-auto bg-white p-8 dark:bg-zinc-900">
+        <h1 className="mb-6 text-4xl font-bold text-zinc-900 dark:text-zinc-100">
+          Devices Management
+        </h1>
+        <p>Loading devices...</p>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="flex-1 overflow-y-auto bg-white p-8 dark:bg-zinc-900">
+        <h1 className="mb-6 text-4xl font-bold text-zinc-900 dark:text-zinc-100">
+          Devices Management
+        </h1>
+        <p className="text-red-500">Error: {error}</p>
+      </main>
+    );
+  }
+
   return (
     <main className="flex-1 overflow-y-auto bg-white p-8 dark:bg-zinc-900">
       <h1 className="mb-6 text-4xl font-bold text-zinc-900 dark:text-zinc-100">
@@ -193,40 +168,43 @@ function DevicesManagement() {
             </thead>
 
             <tbody className="divide-y divide-zinc-200 bg-white dark:divide-zinc-700 dark:bg-zinc-900">
-              {mockDevices.map((device) => (
+              {devices.map((device) => (
                 <tr
                   key={device.id}
                   className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
                 >
                   <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                    {device.id}
+                    {device.device_id}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-600 dark:text-zinc-300">
-                    {device.userId}
+                    {device.user_id}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-600 dark:text-zinc-300">
-                    {device.meta}
+                    {JSON.stringify(device.device_meta)}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-600 dark:text-zinc-300">
-                    <div>{device.registeredAt}</div>
+                    <div>
+                      {new Date(device.registered_at).toLocaleDateString()}
+                    </div>
                     <div className="text-xs text-zinc-400">
-                      {device.registeredTime}
+                      {new Date(device.registered_at).toLocaleTimeString()}
                     </div>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-600 dark:text-zinc-300">
-                    {device.createdBy}
+                    {device.created_by}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm">
                     <StatusBadge status={device.status} />
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm">
-                    <a
-                      href="#"
-                      onClick={(e) => e.preventDefault()}
-                      className="font-medium text-green-600 hover:text-green-700 dark:text-green-500 dark:hover:text-green-400"
-                    >
-                      Approve
-                    </a>
+                    {device.status === "PENDING" && (
+                      <button
+                        onClick={() => handleApprove(device.id)}
+                        className="font-medium text-green-600 hover:text-green-700 dark:text-green-500 dark:hover:text-green-400"
+                      >
+                        Approve
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
