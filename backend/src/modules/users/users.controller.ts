@@ -11,8 +11,6 @@ import {
 import { type CreateUserInput } from "./users.service";
 import { hash, verify } from "../../utils/hash";
 import { SignJWT, jwtVerify } from "jose";
-import { createEvent } from "../events/events.service";
-import { findDeviceVerificationByDeviceId } from "../device_verifications/device_verifications.service";
 import {
   ConflictError,
   UnauthorizedError,
