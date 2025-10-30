@@ -1,8 +1,5 @@
 import { type FastifyInstance } from "fastify";
-import {
-  getDevicesHandler,
-  approveDeviceHandler,
-} from "./devices.controller";
+import { getDevicesHandler, approveDeviceHandler } from "./devices.controller";
 
 export async function devicesRoutes(server: FastifyInstance) {
   server.get(
@@ -35,7 +32,7 @@ export async function devicesRoutes(server: FastifyInstance) {
     getDevicesHandler,
   );
 
-  server.put(
+  server.get(
     "/:id/approve",
     {
       schema: {
