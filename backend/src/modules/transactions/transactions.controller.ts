@@ -1,5 +1,5 @@
 import type { FastifyRequest, FastifyReply } from 'fastify';
-import { createTransaction, findTransactionsByAccountId } from './transactions.service';
+import { createTransaction, findTransactionsByAccountId, getAllTransactions } from './transactions.service';
 import type { CreateTransactionInput } from './transactions.service';
 import { createEvent } from '../events/events.service';
 import { AppError } from '../../utils/errors';
@@ -17,7 +17,7 @@ export async function createTransactionHandler(
   const createdTransaction = await createTransaction({
     ...body,
     account_id: accountId,
-    created_by: request.user.id,
+    created_by: body.created_by || request.user.id,
   });
 
   if (!createdTransaction) {
@@ -47,5 +47,13 @@ export async function getTransactionsHandler(
   const limit = all === 'true' ? undefined : 2;
 
   const transactions = await findTransactionsByAccountId(accountId, limit);
+  return reply.code(200).send(transactions);
+}
+
+export async function getAllTransactionsHandler(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
+  const transactions = await getAllTransactions();
   return reply.code(200).send(transactions);
 }

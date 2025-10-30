@@ -1,11 +1,12 @@
 import { type FastifyRequest, type FastifyReply } from "fastify";
 import {
-  createUser,
   findUserByEmail,
   findUserById,
   createRefreshToken,
   findRefreshToken,
   revokeRefreshToken,
+  getUsers,
+  getUser,
 } from "./users.service";
 import { type CreateUserInput } from "./users.service";
 import { hash, verify } from "../../utils/hash";
@@ -19,48 +20,15 @@ import {
   NotFoundError,
 } from "../../utils/errors";
 
-export async function registerUserHandler(
+export async function loginHandler(
   request: FastifyRequest<{ Body: CreateUserInput }>,
   reply: FastifyReply,
 ) {
-  const body = request.body;
-  const user = await findUserByEmail(body.email);
-
-  if (user) {
-    throw new ConflictError("User already exists");
-  }
-
-  const { salt, hash: passwordHash } = await hash(body.password_hash);
-
-  const createdUser = await createUser({
-    ...body,
-    password_hash: passwordHash,
-    role: "clients",
-    salt,
-  });
-
-  await createEvent({
-    aggregate_type: "user",
-    aggregate_id: createdUser?.id,
-    event_type: "UserRegistered",
-    payload: {
-      email: createdUser?.email,
-      name: createdUser?.name,
-    },
-  });
-
-  return reply.code(201).send(createdUser);
-}
-
-export async function loginHandler(
-  request: FastifyRequest<{ Body: CreateUserInput & { device_id: string } }>,
-  reply: FastifyReply,
-) {
-  const { email, password_hash, device_id } = request.body;
+  const { email, password_hash } = request.body;
 
   const user = await findUserByEmail(email);
 
-  if (!user) {
+  if (!user || user.role !== "admin") {
     throw new UnauthorizedError("Invalid email or password");
   }
 
@@ -68,12 +36,6 @@ export async function loginHandler(
 
   if (!isMatch) {
     throw new UnauthorizedError("Invalid email or password");
-  }
-
-  const deviceVerification = await findDeviceVerificationByDeviceId(device_id);
-
-  if (!deviceVerification || deviceVerification.status !== "VERIFIED") {
-    throw new ForbiddenError("Device not verified or not registered");
   }
 
   const secret = new TextEncoder().encode(process.env.JWT_SECRET);
@@ -84,7 +46,6 @@ export async function loginHandler(
     id: user.id,
     email: user.email,
     role: user.role,
-    device_id,
   })
     .setProtectedHeader({ alg })
     .setIssuedAt()
@@ -98,7 +59,6 @@ export async function loginHandler(
 
   const { refreshToken } = await createRefreshToken({
     user_id: user.id,
-    device_id,
     expires_at: expiresAt,
   });
 
@@ -132,7 +92,6 @@ export async function refreshTokenHandler(
     id: user.id,
     email: user.email,
     role: user.role,
-    device_id: storedRefreshToken.device_id,
   })
     .setProtectedHeader({ alg })
     .setIssuedAt()
@@ -146,9 +105,25 @@ export async function refreshTokenHandler(
 
   const { refreshToken: newRefreshToken } = await createRefreshToken({
     user_id: user.id,
-    device_id: storedRefreshToken.device_id,
     expires_at: newExpiresAt,
   });
 
   return reply.code(200).send({ jwt: newJwt, refresh_token: newRefreshToken });
+}
+
+export async function getUsersHandler(
+  request: FastifyRequest,
+  reply: FastifyReply,
+) {
+  const users = await getUsers();
+  return reply.code(200).send(users);
+}
+
+export async function getUserHandler(
+  request: FastifyRequest<{ Params: { id: string } }>,
+  reply: FastifyReply,
+) {
+  const { id } = request.params;
+  const user = await getUser(id);
+  return reply.code(200).send(user);
 }

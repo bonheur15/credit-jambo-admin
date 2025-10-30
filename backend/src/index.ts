@@ -15,11 +15,15 @@ import { usersRoutes } from "./modules/users/users.routes";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 
+import { dashboardRoutes } from "./modules/dashboard/dashboard.routes";
+
+server.register(dashboardRoutes, { prefix: "/api/dashboard" });
+
 server.register(swagger, {
   openapi: {
     info: {
-      title: "Credit Jambo Customer API",
-      description: "API for Credit Jambo Customer Backend",
+      title: "Credit Jambo Admin API",
+      description: "API for Credit Jambo Admin Backend",
       version: "1.0.0",
     },
     externalDocs: {
@@ -94,12 +98,7 @@ server.register(devicesRoutes, { prefix: "/api/devices" });
 import { transactionsRoutes } from "./modules/transactions/transactions.routes";
 
 server.register(accountsRoutes, { prefix: "/api/accounts" });
-import { deviceVerificationsRoutes } from "./modules/device_verifications/device_verifications.routes";
 
-server.register(transactionsRoutes, { prefix: "/api/accounts" });
-server.register(deviceVerificationsRoutes, {
-  prefix: "/api/device-verifications",
-});
 
 server.get("/", async (request, reply) => {
   return { hello: "world" };

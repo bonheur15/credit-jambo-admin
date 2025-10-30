@@ -1,38 +1,19 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
-import { createDevice, findDeviceByDeviceId } from "./devices.service";
-import type { CreateDeviceInput } from "./devices.service";
-import { createEvent } from "../events/events.service";
-import { ConflictError, AppError } from "../../utils/errors";
+import { getDevices, approveDevice } from "./devices.service";
 
-export async function registerDeviceHandler(
-  request: FastifyRequest<{ Body: CreateDeviceInput }>,
+export async function getDevicesHandler(
+  request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const body = request.body;
+  const devices = await getDevices();
+  return reply.code(200).send(devices);
+}
 
-  const device = await findDeviceByDeviceId(body.device_id);
-
-  if (device) {
-    throw new ConflictError("Device already exists");
-  }
-
-  const createdDevice = await createDevice({
-    ...body,
-    user_id: body.user_id,
-  });
-
-  if (!createdDevice) {
-    throw new AppError("Failed to create device", 500);
-  }
-  await createEvent({
-    aggregate_type: "device",
-    aggregate_id: createdDevice.id,
-    event_type: "DeviceRegistered",
-    payload: {
-      device_id: createdDevice.device_id,
-      user_id: createdDevice.user_id,
-    },
-  });
-
-  return reply.code(201).send(createdDevice);
+export async function approveDeviceHandler(
+  request: FastifyRequest<{ Params: { id: string } }>,
+  reply: FastifyReply,
+) {
+  const { id } = request.params;
+  const device = await approveDevice(id);
+  return reply.code(200).send(device);
 }

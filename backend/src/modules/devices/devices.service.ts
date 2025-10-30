@@ -1,20 +1,17 @@
-
 import { db } from '../../db/db';
 import { devices } from './devices.schema';
+import { deviceVerifications } from '../device_verifications/device_verifications.schema';
 import { eq } from 'drizzle-orm';
-import { createInsertSchema } from 'drizzle-zod';
-import { z } from 'zod';
 
-const insertDeviceSchema = createInsertSchema(devices);
-
-export type CreateDeviceInput = z.infer<typeof insertDeviceSchema>;
-
-export async function createDevice(data: CreateDeviceInput) {
-  const result = await db.insert(devices).values(data).returning();
-  return result[0];
+export async function getDevices() {
+  const result = await db.select().from(devices);
+  return result;
 }
 
-export async function findDeviceByDeviceId(deviceId: string) {
-  const result = await db.select().from(devices).where(eq(devices.device_id, deviceId));
+export async function approveDevice(deviceId: string) {
+  const result = await db.insert(deviceVerifications).values({
+    device_id: deviceId,
+    status: 'VERIFIED',
+  }).returning();
   return result[0];
 }

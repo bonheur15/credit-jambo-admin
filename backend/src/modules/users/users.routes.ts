@@ -1,72 +1,20 @@
 import { type FastifyInstance } from "fastify";
 import {
-  registerUserHandler,
   loginHandler,
   refreshTokenHandler,
+  getUsersHandler,
+  getUserHandler,
 } from "./users.controller";
 import { createInsertSchema } from "drizzle-zod";
 import { users } from "./users.schema";
 import { z } from "zod";
-import { $ref } from "../../schemas";
 
-const insertUserSchema = createInsertSchema(users);
 const loginSchema = createInsertSchema(users, {
   email: z.string().email(),
   password_hash: z.string().min(8),
 });
 
 export async function usersRoutes(server: FastifyInstance) {
-  server.post(
-    "/",
-    {
-      schema: {
-        body: {
-          type: "object",
-          properties: {
-            email: { type: "string", format: "email" },
-            password_hash: { type: "string", minLength: 8 },
-            name: { type: "string" },
-          },
-          required: ["email", "password_hash"],
-        },
-        response: {
-          201: {
-            description: "User created successfully",
-            type: "object",
-            properties: {
-              id: { type: "string", format: "uuid" },
-              email: { type: "string", format: "email" },
-              name: { type: "string" },
-            },
-            example: {
-              id: "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-              email: "user@example.com",
-              name: "John Doe",
-              created_at: "2023-10-27T10:00:00.000Z",
-            },
-          },
-          400: {
-            description: "Bad request, validation error",
-            type: "object",
-            properties: {
-              error: { type: "string" },
-              message: { type: "string" },
-            },
-          },
-          500: {
-            description: "Internal server error",
-            type: "object",
-            properties: {
-              error: { type: "string" },
-              message: { type: "string" },
-            },
-          },
-        },
-      },
-    },
-    registerUserHandler,
-  );
-
   server.post(
     "/login",
     {
@@ -90,39 +38,13 @@ export async function usersRoutes(server: FastifyInstance) {
               jwt: { type: "string" },
               refresh_token: { type: "string" },
             },
-            example: {
-              jwt: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
-            },
-          },
-          400: {
-            description: "Bad request, validation error",
-            type: "object",
-            properties: {
-              error: { type: "string" },
-              message: { type: "string" },
-            },
-          },
-          401: {
-            description: "Unauthorized, invalid credentials",
-            type: "object",
-            properties: {
-              error: { type: "string" },
-              message: { type: "string" },
-            },
-          },
-          500: {
-            description: "Internal server error",
-            type: "object",
-            properties: {
-              error: { type: "string" },
-              message: { type: "string" },
-            },
           },
         },
       },
     },
     loginHandler,
   );
+
   server.post(
     "/refresh-token",
     {
@@ -145,30 +67,78 @@ export async function usersRoutes(server: FastifyInstance) {
               jwt: { type: "string" },
               refresh_token: { type: "string" },
             },
-            example: {
-              jwt: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
-              refresh_token: "another-long-refresh-token",
-            },
-          },
-          401: {
-            description: "Unauthorized, invalid refresh token",
-            type: "object",
-            properties: {
-              error: { type: "string" },
-              message: { type: "string" },
-            },
-          },
-          500: {
-            description: "Internal server error",
-            type: "object",
-            properties: {
-              error: { type: "string" },
-              message: { type: "string" },
-            },
           },
         },
       },
     },
     refreshTokenHandler,
+  );
+
+  server.get(
+    "/",
+    {
+      schema: {
+        summary: "Get all users",
+        description: "Returns a list of all users.",
+        tags: ["Users"],
+        response: {
+          200: {
+            description: "A list of users",
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                email: { type: "string" },
+                name: { type: "string" },
+                created_at: { type: "string" },
+              },
+            },
+          },
+        },
+      },
+    },
+    getUsersHandler,
+  );
+
+  server.get(
+    "/:id",
+    {
+      schema: {
+        summary: "Get a user by ID",
+        description: "Returns a single user, including their accounts and balances.",
+        tags: ["Users"],
+        params: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+          },
+        },
+        response: {
+          200: {
+            description: "User details",
+            type: "object",
+            properties: {
+              id: { type: "string" },
+              email: { type: "string" },
+              name: { type: "string" },
+              created_at: { type: "string" },
+              accounts: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    id: { type: "string" },
+                    currency: { type: "string" },
+                    balance: { type: "number" },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    getUserHandler,
   );
 }
