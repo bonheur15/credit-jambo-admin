@@ -92,7 +92,7 @@ export async function getUser(id: string) {
 
       return {
         ...account,
-        balance: balanceResult.balance,
+        balance: balanceResult?.balance,
       };
     }),
   );
