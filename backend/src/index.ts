@@ -8,7 +8,7 @@ const server = Fastify({
 });
 
 server.register(cors, {
-  origin: ["http://localhost:3000", "http://localhost:3001"],
+  origin: ["http://localhost:3000", "http://localhost:3002"],
 });
 
 import { usersRoutes } from "./modules/users/users.routes";
@@ -106,7 +106,7 @@ server.get("/", async (request, reply) => {
 
 const start = async () => {
   try {
-    await server.listen({ port: 4000, host: "0.0.0.0" });
+    await server.listen({ port: 4001, host: "0.0.0.0" });
   } catch (err) {
     server.log.error(err);
     process.exit(1);
