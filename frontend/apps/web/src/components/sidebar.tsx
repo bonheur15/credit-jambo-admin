@@ -36,15 +36,6 @@ export default function Sidebar() {
           </Link>
 
           <Link
-            to="/accounts"
-            activeProps={{ className: "bg-zinc-100 text-zinc-900" }}
-            className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors hover:bg-zinc-800 hover:text-white"
-          >
-            <User className="h-5 w-5" />
-            Accounts
-          </Link>
-
-          <Link
             to="/transactions"
             activeProps={{ className: "bg-zinc-100 text-zinc-900" }}
             className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors hover:bg-zinc-800 hover:text-white"
