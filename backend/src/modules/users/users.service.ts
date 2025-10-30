@@ -1,7 +1,7 @@
 import { db } from "../../db/db";
 import { users, refreshTokens } from "./users.schema";
 import { accounts } from "../accounts/accounts.schema";
-import { account_balance_snapshots } from "../account_balance_snapshots/account_balance_snapshots.schema";
+import { accountBalanceSnapshots as account_balance_snapshots } from "../account_balance_snapshots/account_balance_snapshots.schema";
 import { eq, and, isNull, desc } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";

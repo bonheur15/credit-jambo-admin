@@ -15,10 +15,6 @@ import { usersRoutes } from "./modules/users/users.routes";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 
-import { dashboardRoutes } from "./modules/dashboard/dashboard.routes";
-
-server.register(dashboardRoutes, { prefix: "/api/dashboard" });
-
 server.register(swagger, {
   openapi: {
     info: {
@@ -99,6 +95,9 @@ import { transactionsRoutes } from "./modules/transactions/transactions.routes";
 
 server.register(accountsRoutes, { prefix: "/api/accounts" });
 
+import { dashboardRoutes } from "./modules/dashboard/dashboard.routes";
+
+server.register(dashboardRoutes, { prefix: "/api/dashboard" });
 
 server.get("/", async (request, reply) => {
   return { hello: "world" };

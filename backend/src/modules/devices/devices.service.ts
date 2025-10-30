@@ -1,6 +1,5 @@
 import { db } from '../../db/db';
-import { devices } from './devices.schema';
-import { deviceVerifications } from '../device_verifications/device_verifications.schema';
+import { devices, deviceVerifications } from './devices.schema';
 import { eq } from 'drizzle-orm';
 
 export async function getDevices() {
