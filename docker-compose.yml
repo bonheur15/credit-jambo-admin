@@ -7,6 +7,7 @@ services:
       - "4001:4001"
     env_file:
       - ./backend/.env
+    network_mode: host
 
   frontend:
     build:

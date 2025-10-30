@@ -54,10 +54,10 @@ function LoginComponent() {
             Jambo
           </h1>
           <h2 className="mt-4 text-3xl font-bold text-zinc-900 dark:text-zinc-100">
-            Welcome back!
+            Welcome back! Admin
           </h2>
           <p className="mt-2 text-base text-zinc-600 dark:text-zinc-400">
-            Let's manage your savings.
+            Let's This amazing platform
           </p>
         </header>
 
