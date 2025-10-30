@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import React from "react";
 import { toast } from "sonner";
-import { ListIcon, HomeIcon, UserIcon } from "lucide-react";
 import { fetchWithAuth } from "../lib/api";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -36,7 +35,7 @@ function TransactionsComponent() {
 
   const fetchAccounts = async () => {
     try {
-      const response = await fetchWithAuth(`${API_URL}accounts`);
+      const response = await fetchWithAuth(`accounts`);
 
       if (response.ok) {
         const data = await response.json();
@@ -55,7 +54,7 @@ function TransactionsComponent() {
     for (const account of accounts) {
       try {
         const response = await fetchWithAuth(
-          `${API_URL}accounts/${account.id}/transactions?all=true`,
+          `transactions/${account.id}/transactions?all=true`,
         );
 
         if (response.ok) {
@@ -140,26 +139,6 @@ function TransactionsComponent() {
           </div>
         </section>
       </main>
-
-      <nav className="fixed bottom-0 left-0 w-full border-t border-zinc-200 bg-white px-6 py-4 dark:border-zinc-700 dark:bg-zinc-900">
-        <div className="mx-auto flex max-w-sm justify-around">
-          <button
-            className="text-zinc-400 dark:text-zinc-500"
-            onClick={() => navigate({ to: "/dashboard" })}
-          >
-            <HomeIcon className="h-7 w-7" />
-          </button>
-          <button
-            className="text-zinc-900 dark:text-zinc-100"
-            onClick={() => navigate({ to: "/transactions" })}
-          >
-            <ListIcon className="h-7 w-7" />
-          </button>
-          <button className="text-zinc-400 dark:text-zinc-500">
-            <UserIcon className="h-7 w-7" />
-          </button>
-        </div>
-      </nav>
     </div>
   );
 }
